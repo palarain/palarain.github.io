@@ -5,7 +5,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="keywords" content="ConcurrentHashMap, Agnus Dei">
-    <meta name="description" content="ConcurrentHashMap | Agnus Dei">
+    <meta name="description" content="简介支持检索的完全并发性和更新的高期望并发性的哈希表。该类遵循与Hashtable相同的功能规范，并包含与Hashtable的每个方法对应的方法版本。但是，即使所有操作都是线程安全的，检索操作也不需要锁定，而且不支持以阻止所有访问的方式锁定">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -420,7 +420,18 @@
         <hr class="clearfix">
         <div class="card-content article-card-content">
             <div id="articleContent">
-                
+                <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>支持检索的完全并发性和更新的高期望并发性的哈希表。该类遵循与Hashtable相同的功能规范，并包含与Hashtable的每个方法对应的方法版本。但是，即使所有操作都是线程安全的，检索操作也不需要锁定，而且不支持以阻止所有访问的方式锁定整个表。在依赖于线程安全而不依赖于同步细节的程序中，该类与Hashtable完全可互操作。<br>检索操作(包括get)通常不会阻塞，因此可能与更新操作(包括put和remove)重叠。检索反映最近完成的更新操作在开始时的结果。(更正式地说，给定键的更新操作与报告更新值的键的任何(非空)检索都是happens-before关系。)对于putAll和clear等聚合操作，并发检索可能只反映插入或删除某些条目。类似地，迭代器、Spliterators和枚举返回元素，这些元素反映了在迭代器/枚举创建时或创建后哈希表的状态。它们不抛出ConcurrentModificationException。但是，迭代器一次只能被一个线程使用。请记住，包括size、isEmpty和containsValue在内的聚合状态方法的结果通常只有在映射没有在其他线程中进行并发更新时才有用。否则，这些方法的结果反映了可能适合于监测或估计目的，但不适合于程序控制的暂态状态。<br>当有太多的冲突时(键具有不同的哈希码，但属于相同的槽模表大小的键)，每个映射维护大约两个箱子的预期平均效果(对应于调整大小的0.75负载因素阈值)，表就会动态扩展。在添加和删除映射时，这个平均值可能会有很大的差异，但总的来说，这维护了哈希表的普遍接受的时间/空间权衡。然而，调整这个或任何其他类型的哈希表可能是一个相对缓慢的操作。如果可能，最好将大小估计值作为可选的initialCapacity构造函数参数提供。另外一个可选的loadFactor构造函数参数提供了定制初始表容量的进一步方法，它指定了用于计算给定元素数量要分配的空间量的表密度。此外，为了与这个类的以前版本兼容，构造函数可以选择指定一个预期的并发级别作为内部分级的额外提示。注意，使用具有相同hashCode()的多个键肯定会降低任何散列表的性能。为了改善影响，当键是可比较的，这个类可以使用键之间的比较顺序来帮助打破联系。<br>ConcurrentHashMap的一个集合投影可以被创建(使用newKeySet()或newKeySet(int))，或者被查看(使用keySet(Object)，当只有感兴趣的键时，而映射的值(可能暂时)没有被使用，或者全部使用相同的映射值。<br>ConcurrentHashMap可以使用java.util.concurrent.atomic作为可伸缩的频率映射(直方图或多集的一种形式)。LongAdder值和初始化通过computeIfAbsent。例如，要向ConcurrentHashMap freqs添加一个计数，您可以使用freqs. computeifabsent (k -&gt; new LongAdder()).increment();<br>该类及其视图和迭代器实现映射和迭代器接口的所有可选方法。<br>与Hashtable类似，但与HashMap不同，该类不允许将null用作键或值。<br>ConcurrentHashMaps支持一组连续的和并行的批量操作，这些操作与大多数流方法不同，即使在其他线程同时更新的映射中，也可以安全且通常合理地应用这些操作;例如，在计算共享注册表中值的快照摘要时。有三种操作，每种有四种形式，接受带有键、值、条目和(键、值)参数和/或返回值的函数。因为ConcurrentHashMap的元素不是命令在任何特定的方式,并可能在不同的订单处理并行执行的正确性提供功能不应该依赖于任何命令,或任何其他对象或值可能是暂时性的变化而计算正在进行中;除了每一个动作，最好是没有副作用的。在地图上批量操作。条目对象不支持setValue方法。  </p>
+<ul>
+<li>forEach:对每个元素执行给定的操作。变体形式在执行操作之前对每个元素应用给定的转换。  </li>
+<li>search:返回第一个可用的非空结果应用一个给定的函数对每个元素;当找到结果时，跳过进一步的搜索。</li>
+<li>reduce每个元素积累。所提供的约简函数不能依赖于排序(更正式地说，它应该是结合的和交换的)。有五种变体:</li>
+</ul>
+<ul>
+<li>普通的减少。(对于(key, value)函数参数没有这种形式的方法，因为没有相应的返回类型。)  </li>
+<li>将给定函数的结果累积到每个元素上的映射约简。  </li>
+<li>使用给定的基值将其缩减为标量双精度、长精度和整数。<br>这些批量操作接受一个并行阈值参数。如果当前映射大小估计小于给定阈值，则按顺序执行。使用Long值。MAX_VALUE禁止所有并行。使用值1可以通过划分足够的子任务来充分利用所有并行计算使用的ForkJoinPool.commonPool()，从而产生最大的并行度。通常，您首先会选择这些极值中的一个，然后度量使用介于开销和吞吐量之间的值的性能。<br>批量操作的并发属性遵循ConcurrentHashMap的并发属性:从get(key)和相关访问方法返回的任何非空结果都与相关的插入或更新保持happens-before关系。任何批量操作的结果都反映了这些每元素关系的组成(但对于整个映射来说，它不一定是原子的，除非知道它是静态的)。相反，由于映射中的键和值从不为空，所以null可以作为当前缺少任何结果的可靠原子指示器。要维护此属性，null作为所有非标量约简操作的隐式基。对于double、long和int版本，其基础应该是与任何其他值组合时返回该其他值的基(更正式地说，应该是约简的标识元素)。大多数常见的还原具有这些性质;例如，用基0计算和或用基MAX_VALUE计算最小值。<br>作为参数提供的搜索和转换函数应该类似地返回null，以指示缺少任何结果(在这种情况下不使用它)。在映射约简的情况下，这还允许转换充当过滤器，如果元素不应该组合，则返回null(或者，在原语专门化的情况下，返回标识基)。您可以在搜索或reduce操作中使用它们之前，通过在“null表示现在什么也没有”规则下自己组合它们来创建复合转换和筛选。<br>接受和/或返回条目参数的方法保持键值关联。例如，在查找最大值的键时，它们可能很有用。注意，可以使用新的AbstractMap.SimpleEntry(k,v)提供“普通”条目参数。<br>批量操作可能会突然完成，从而引发在提供的函数的应用程序中遇到的异常。在处理此类异常时，请记住，其他并发执行的函数也可能抛出异常，或者如果没有发生第一个异常，就会抛出异常。<br>与顺序形式相比，并行形式的加速很常见，但不能保证。如果并行化计算的底层工作比计算本身的开销更大，那么涉及小映射上的简短函数的并行操作可能比顺序表单执行得更慢。类似地，如果所有处理器都忙于执行不相关的任务，那么并行化可能不会导致实际的并行化。<br>所有任务方法的所有参数必须是非空的。<br>该类是Java集合框架的成员。</li>
+</ul>
+
             </div>
             <hr/>
 
@@ -596,7 +607,7 @@
                     </div>
                 </a>
                 <div class="card-content article-content">
-                    <div class="summary"></div>
+                    <div class="summary">简介支持检索的完全并发性和更新的高期望并发性的哈希表。该类遵循与Hashtable相同的功能规范，并包含与Hashtable的每个方法对应的方法版本。但是，即使所有操作都是线程安全的，检索操作也不需要锁定，而且不支持以阻止所有访问的方式锁定</div>
                     <div class="publish-info">
                             <span class="publish-date">
                                 <i class="fa fa-clock-o fa-fw icon-date"></i>2019-11-27
